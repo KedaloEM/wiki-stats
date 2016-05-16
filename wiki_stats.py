@@ -93,18 +93,32 @@ if __name__ == '__main__':
     if os.path.isfile(sys.argv[1]):
         wg = WikiGraph()
         wg.load_from_file(sys.argv[1])
-        maxlinks = max(wg.get_links_from(i) for i in range(wg.get_number_of_pages()))
-        print('Maximum number of links  = ', len(maxlinks))
-        minlinks = min(wg.get_links_from(i) for i in range(wg.get_number_of_pages()))
-        print('Minimum number of links = ', len(minlinks))
-        redirlinks = sum(1 for i in range(wg.get_number_of_pages()) if wg.is_redirect(i))
-        print('The number of links with redirection = ', redirlinks)
-        pageminlink = sum(1 for i in range(wg.get_number_of_pages()) if len(wg.get_links_from(i)) == len(minlinks))
-        print('The number of articles with minlinks = ', pageminlink)
-        pageminlink = sum(1 for i in range(wg.get_number_of_pages()) if len(wg.get_links_from(i)) == len(maxlinks))
-        print('The number of articles with maxlinks = ', pageminlink)
-        averagelink = statistics.mean(wg.get_number_of_links_from(i)for i in range(wg.get_number_of_pages()))
-        print('The AVERAGE number of links = ', round(averagelink,0))
+        maxlinks = (wg.get_number_of_links_from(i) for i in range(wg.get_number_of_pages()))
+        maxlin = max(maxlinks)
+        minlinks = (wg.get_number_of_links_from(i) for i in range(wg.get_number_of_pages()))
+        minlin = min(minlinks)
+        print('Maximum number of links  = ', maxlin)
+        print('Minimum number of links = ', minlin)
+        ##redirlinks = sum(1 for i in range(wg.get_number_of_pages()) if wg.is_redirect(i))
+        sum = 0
+        sum1 = 0
+        sum2 = 0
+        for i in range(wg.get_number_of_pages()):
+            if wg.is_redirect(i):
+                sum+=1
+            if wg.get_number_of_links_from(i) == minlin:
+                sum1+=1
+            if wg.get_number_of_links_from(i) ==maxlin:
+                sum2+=1
+        print('The number of links with redirection = ', sum)
+        ##pageminlink = sum(1 for i in range(wg.get_number_of_pages()) if wg.get_number_of_links_from(i) == minlin)
+        print('The number of articles with minlinks = ', sum1)
+        ##pageminlink = sum(1 for i in range(wg.get_number_of_pages()) if wg.get_number_of_links_from(i) == maxlin)
+        print('The number of articles with maxlinks = ', sum2)
+        ##averagelink = statistics.mean(wg.get_number_of_links_from(i) for i in range(wg.get_number_of_pages()))
+        averagelink = (wg.get_number_of_links_from(i) for i in range(wg.get_number_of_pages()))
+        aver = statistics.mean(averagelink)
+        print('The AVERAGE number of links = ', round(aver,0))
         links_on=[0]*wg.get_number_of_pages()
         for u in range(wg.get_number_of_pages()):
             for t in wg.get_links_from(u):
@@ -122,9 +136,13 @@ if __name__ == '__main__':
                     if z == i:
                         number += 1
             return(number)
-
-        number_minlinked = sum(1 for i in range(wg.get_number_of_pages() + 1) if find_links(i) == m)
-        numbermax_linked = sum(1 for i in range(wg.get_number_of_pages() + 1) if find_links(i) == n)
+        sum3 = 0
+        sum4 = 0
+        for i in range(wg.get_number_of_pages()):
+            if find_links(i) ==m:
+                sum3 += 1
+            if find_links(i) ==n:
+                sum4 += 1
         dirs = [0] * wg.get_number_of_pages()
         for i in range(wg.get_number_of_pages()):
             if not wg.is_redirect(i):
@@ -134,17 +152,22 @@ if __name__ == '__main__':
         print('Maximum number of redirections to the link', max(dirs))
         print('Number of links with minimum of redirections', dirs.count(min(dirs)))
         print('Number of links with maximum of redirections', dirs.count(max(dirs)))
-        print('Number of minlinked pages = ', number_minlinked)
-        print('Number of maxlinked pages = ', numbermax_linked)
-        hist(fname='4-1.png', data=[wg.get_number_of_links_from(i) for i in range(wg._n)], bins=200,xlabel='Количество статей', ylabel="Количество ссылок", title="Распределение количества ссылок из статьи")
+        print('Number of minlinked pages = ', sum3)
+        print('Number of maxlinked pages = ', sum4)
+        hist(fname='4-1.png', data=[wg.get_number_of_links_from(i) for i in range(wg._n)],
+             bins=200,xlabel='Количество статей', ylabel="Количество ссылок", title="Распределение количества ссылок из статьи")
         plt.show()
-        hist(fname='4-2.png', data=[links_on[i] for i in range(wg._n)], bins=50, xlabel='Количество статей',ylabel='Количество ссылок', title='Распределение количества ссылок на статью')
+        hist(fname='4-2.png', data=[links_on[i] for i in range(wg._n)],
+             bins=50, xlabel='Количество статей',ylabel='Количество ссылок', title='Распределение количества ссылок на статью')
         plt.show()
-        hist(fname='4-3.png', data=[wg.get_page_size(i) for i in range(wg._n) ], bins=200,xlabel='Количество статей',ylabel='Размер', title='Распределение размеров по статьям')
+        hist(fname='4-3.png', data=[wg.get_page_size(i) for i in range(wg._n) ],
+             bins=200,xlabel='Количество статей',ylabel='Размер', title='Распределение размеров по статьям')
         plt.show()
-        hist(fname='4-4.png', data=[math.log(wg.get_page_size(i),math.e) for i in range(wg._n)], bins=200,xlabel='Количество статей',ylabel='Размер', title='Распределение размеров по статьям в логарифмическом масштабе')
+        hist(fname='4-4.png', data=[math.log(wg.get_page_size(i),math.e) for i in range(wg._n)],
+             bins=200,xlabel='Количество статей',ylabel='Размер', title='Распределение размеров по статьям в логарифмическом масштабе')
         plt.show()
-        hist(fname='4-5.png', data=[dirs[i] for i in range(wg.get_number_of_pages())], bins=200, xlabel='Количество статей', ylabel='Количество перенаправлений на статью', title='Распределение количества перенаправлений на статью')
+        hist(fname='4-5.png', data=[dirs[i] for i in range(wg.get_number_of_pages())],
+             bins=200, xlabel='Количество статей', ylabel='Количество перенаправлений на статью', title='Распределение количества перенаправлений на статью')
         plt.show()
     else:
         print('Файл с графом не найден')
